@@ -13,7 +13,7 @@ SELECT @sql = @sql + N'UNION ALL
       WHERE [p].[create_date] > (SELECT DATEADD(HH, -1, GETDATE()))
   )
   ' FROM sys.databases 
-WHERE database_id > 4 AND state = 0;
+WHERE database_id > 4 AND state = 0; --ignore system databases
 
 SET @sql = N'SELECT DatabaseName, NumberOfCreatedProcedures FROM 
 (' + STUFF(@sql, 1, 10, N'') 
