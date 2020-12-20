@@ -1,3 +1,4 @@
+--https://github.com/MelissaConnors
 --find databases by name, count(*) for sys.foreign_keys.is_not_trusted = true
 DECLARE @sql nvarchar(max);
 SET @sql = N'';
