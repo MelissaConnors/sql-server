@@ -1,3 +1,4 @@
+--https://github.com/MelissaConnors
 --find databases by name, count(*) for sys.check_constraints.is_not_trusted = true
 DECLARE @sql nvarchar(max);
 SET @sql = N'';
