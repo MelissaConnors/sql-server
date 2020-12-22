@@ -1,5 +1,5 @@
 --https://github.com/MelissaConnors
---find databases with tables createdin the past hour
+--find databases with tables created in the past hour
 --execute against master database
 --adjust time in (SELECT DATEADD(HH, -1, GETDATE()))
 
