@@ -1,0 +1,36 @@
+--https://github.com/MelissaConnors
+--find databases with tables modified in the past hour
+--execute against master database
+--adjust time in (SELECT DATEADD(HH, -1, GETDATE()))
+
+DECLARE @sql nvarchar(max);
+SET @sql = N'';
+SELECT @sql = @sql + N'UNION ALL 
+  SELECT DatabaseName = N''' + name + ''' COLLATE Latin1_General_BIN, 
+  NumberOfModifiedTables =  
+  (
+    SELECT COUNT(*) as NumberOfModifiedTables
+      FROM ' + QUOTENAME(name) + '.sys.tables t WITH (NOLOCK)'
+   + N'
+      WHERE [t].[modify_date] >= (SELECT DATEADD(HH, -1, GETDATE()))
+   AND [t].[modify_date] != [t].[create_date]
+  )
+  ' FROM sys.databases 
+WHERE database_id > 4 AND state = 0; --ignore system tables
+
+SET @sql = N'SELECT DatabaseName, NumberOfModifiedTables FROM 
+(' + STUFF(@sql, 1, 10, N'') 
+   + N') AS x 
+   WHERE NumberOfModifiedTables > 0
+   ORDER BY NumberOfModifiedTables DESC';
+
+EXEC sys.sp_executesql @sql;
+
+/*
+--run against databases in results set
+SELECT schema_name(schema_id), [name], modify_date, create_date
+FROM sys.tables
+WHERE modify_date >= (SELECT CONVERT(DATE,GETDATE()))
+AND modify_date != create_date
+ORDER by modify_date DESC;
+*/
