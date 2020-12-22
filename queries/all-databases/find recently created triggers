@@ -1,0 +1,42 @@
+--https://github.com/MelissaConnors
+--find databases with triggers created in the past hour
+--execute against master database
+--adjust time in (SELECT DATEADD(HH, -1, GETDATE()))
+
+DECLARE @sql nvarchar(max);
+SET @sql = N'';
+SELECT @sql = @sql + N'UNION ALL 
+  SELECT DatabaseName = N''' + name + ''' COLLATE Latin1_General_BIN, 
+  NumberOfCreatedTriggers =  
+  (
+    SELECT COUNT(*) as NumberOfCreatedTriggers
+      FROM ' + QUOTENAME(name) + '.sys.triggers t WITH (NOLOCK)'
+   + N'
+      WHERE [t].[create_date] >= (SELECT DATEADD(HH, -1, GETDATE()))
+  )
+  ' FROM sys.databases 
+WHERE database_id > 4 AND state = 0;
+
+SET @sql = N'SELECT DatabaseName, NumberOfCreatedTriggers FROM 
+(' + STUFF(@sql, 1, 10, N'') 
+   + N') AS x 
+   WHERE NumberOfCreatedTriggers > 0
+   ORDER BY NumberOfCreatedTriggers DESC';
+
+EXEC sys.sp_executesql @sql;
+
+/*
+--run against databases in results set
+SELECT t.[name] as [trigger name],
+t.is_instead_of_trigger as [is instead of], 
+SCHEMA_NAME(s.schema_id) as [parent schema], 
+OBJECT_NAME(t.parent_id) as [parent object],  
+o.type_desc as [parent type], 
+t.create_date 
+FROM sys.triggers t
+JOIN sys.objects o
+ON o.object_id = t.parent_id
+JOIN sys.schemas s ON o.schema_id = s.schema_id
+WHERE t.create_date >= (SELECT CONVERT(DATE,GETDATE()))
+ORDER BY t.create_date DESC; 
+*/
