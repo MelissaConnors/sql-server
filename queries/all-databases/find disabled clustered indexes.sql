@@ -1,3 +1,5 @@
+--https://github.com/MelissaConnors
+--find databases by name, count(*) for sys.indexes.disabled = 1 for clustered type
 DECLARE @sql nvarchar(max);
 SET @sql = N'';
 SELECT @sql = @sql + N'UNION ALL 
@@ -20,3 +22,10 @@ SET @sql = N'SELECT DatabaseName, NumberOfDisabledClusteredIndexes FROM
    ORDER BY NumberOfDisabledClusteredIndexes DESC';
 
 EXEC sys.sp_executesql @sql;
+
+/*
+Run against databases in the results set
+select * from sys.indexes
+where type = 1
+AND is_disabled = 1
+*/
